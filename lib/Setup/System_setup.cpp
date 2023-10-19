@@ -5,7 +5,6 @@
 
 void system_setup()
 {
-    Serial.begin(115200);
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
     Wire.setClock(400000);
