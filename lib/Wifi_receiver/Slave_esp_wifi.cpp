@@ -8,12 +8,13 @@ uint8_t middleMacAddress[] = {0x48, 0xE7, 0x29, 0x9F, 0xDD, 0xD4};
 static const char* PMK_KEY_STR = "_A_H_L_T_T_T_ED3";
 static const char* LMK_KEY_STR = "_SON_DINH_VU_ED3";
 
+
 // UART Data received from middle ESP32 through ESP_NOW
-uint8_t buttonReceived;
+int8_t joystick_receivedValue;
 
 // Define a data structure
 typedef struct {
-  uint8_t buttonUART;
+  int8_t joystickUART;
 } UARTmessage;
  
 // Create a structured object
@@ -37,9 +38,9 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   printMAC(middleMacAddress);                /// For debug only ///
 
   memcpy(&UARTData, incomingData, sizeof(UARTData));
-  buttonReceived = UARTData.buttonUART;
-  Serial.print("Button: ");
-  Serial.println(button);
+  joystick_receivedValue = UARTData.joystickUART;
+  Serial.print("Joystick Value: ");
+  Serial.println(joystick_receivedValue);
 }
 
 void init_espnow_receiver()

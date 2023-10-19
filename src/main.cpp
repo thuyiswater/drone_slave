@@ -31,5 +31,5 @@ void loop()
   // angle_printing();
   ReceiveThrottleInput();
   // Serial.println(button);
-  Serial.println(Throttle);
+  
 }
