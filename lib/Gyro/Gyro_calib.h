@@ -1,12 +1,12 @@
 #pragma once
 
 // Declare global variables
-extern float RateRoll;
-extern float RatePitch;
-extern float RateYaw;
+float RateRoll;
+float RatePitch;
+float RateYaw;
 
-extern float AngleRoll;
-extern float AnglePitch;
+float AngleRoll;
+float AnglePitch;
 
 void gyro_calib_signal();
 void calibration_measurement();
