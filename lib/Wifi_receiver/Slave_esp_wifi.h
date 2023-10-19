@@ -1,4 +1,4 @@
 #pragma once
 
-extern uint8_t buttonReceived;
+extern int8_t joystick_receivedValue;
 void init_espnow_receiver();

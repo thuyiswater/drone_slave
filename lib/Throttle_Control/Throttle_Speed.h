@@ -1,5 +1,5 @@
 #pragma once
 
-extern int Throttle;
+extern float Throttle;
 void init_ESC();
 void ReceiveThrottleInput();

@@ -9,7 +9,8 @@
 #define EscPin_RightBack 18
 
 Servo ESC1, ESC2, ESC3, ESC4;
-int Throttle = 0;
+float Throttle = 0;
+float difference_Dist = (float) 180 / (float) 127;
 
 void init_ESC(){
 ESC1.attach(EscPin_LeftBack,1000,2000); 
@@ -24,32 +25,21 @@ ESC4.write(0);
 }
 
 void ReceiveThrottleInput(){
-      if (button == 1){
-        delay(20);
-        Throttle++;
-        if (Throttle >= 180) {
-          Throttle = 180;
-        }
-      };
-
-      if (button == 2) {
-        delay(20);
-        Throttle--;
-        if (Throttle <=  0) {
-          Throttle = 0;
-        }
+      //Left JoyStick Control
+      delay (20);
+      if (joystick_receivedValue <= 10) {
+        Throttle = 0;
+      } else if (joystick_receivedValue > 10) {
+        Throttle = joystick_receivedValue *  difference_Dist;
       }
-      
-      if(Throttle >= 73){
-        ESC1.write(Throttle);
-        ESC2.write(Throttle);
-        ESC3.write(Throttle);
-        ESC4.write(Throttle);
-      } else if (Throttle < 73) {
-            ESC1.write(0);
-            ESC2.write(0);
-            ESC3.write(0);
-            ESC4.write(0);
-        }
-} 
- 
+
+      //Right JoyStick Control (P)
+
+
+      ESC1.write(Throttle);
+      ESC2.write(Throttle);
+      ESC3.write(Throttle);
+      ESC4.write(Throttle);
+
+      Serial.printf("%.2f \n", Throttle);
+}
