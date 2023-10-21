@@ -5,8 +5,8 @@
 
 void system_setup()
 {
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
+    // pinMode(13, OUTPUT);
+    // digitalWrite(13, HIGH);
     Wire.setClock(400000);
     Wire.begin();
     delay(250);

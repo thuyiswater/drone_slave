@@ -1,7 +1,9 @@
 #pragma once
 
-extern int8_t LJSY;
-extern int8_t RJSX;
-extern int8_t RJSY;
+
+extern int8_t LY_joystick_receivedValue;
+extern int8_t RX_joystick_receivedValue;
+extern int8_t RY_joystick_receivedValue;
+
 
 void init_espnow_receiver();

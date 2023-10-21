@@ -9,17 +9,20 @@ static const char* PMK_KEY_STR = "_A_H_L_T_T_T_ED3";
 static const char* LMK_KEY_STR = "_SON_DINH_VU_ED3";
 
 
-// Wifi Data received from middle ESP32 through ESP_NOW
-int8_t LJSY;
-int8_t RJSX;
-int8_t RJSY;
+// UART Data received from middle ESP32 through ESP_NOW
+int8_t LY_joystick_receivedValue;
+int8_t RX_joystick_receivedValue;
+int8_t RY_joystick_receivedValue;
+
 
 // Define a testing message structure
 typedef struct {
-  int8_t LeftY;
-  int8_t RightX;
-  int8_t RightY;
-} wifiMessage;
+
+  int8_t LJSY;
+  int8_t RJSX;
+  int8_t RJSY;
+} UARTmessage;
+
  
 // Create a structured object
 wifiMessage wifiData;
@@ -41,16 +44,18 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   Serial.print("Packet received from: ");
   printMAC(middleMacAddress);                /// For debug only ///
 
-  memcpy(&wifiData, incomingData, sizeof(wifiData));
-  LJSY = wifiData.LeftY;
-  RJSX = wifiData.RightX;
-  RJSY = wifiData.RightY;
+
+  memcpy(&UARTData, incomingData, sizeof(UARTData));
   Serial.print("Left Y: ");
-  Serial.println(LJSY);
+  Serial.println(UARTData.LJSY);
   Serial.print("Right X: ");
-  Serial.println(RJSX);
+  Serial.println(UARTData.RJSX);
   Serial.print("Right Y: ");
-  Serial.println(RJSY);
+  Serial.println(UARTData.RJSY);
+
+  LY_joystick_receivedValue = UARTData.LJSY;
+
+
 }
 
 void init_espnow_receiver()
