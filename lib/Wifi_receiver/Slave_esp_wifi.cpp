@@ -10,11 +10,15 @@ static const char* LMK_KEY_STR = "_SON_DINH_VU_ED3";
 
 
 // UART Data received from middle ESP32 through ESP_NOW
-int8_t joystick_receivedValue;
+int8_t LY_joystick_receivedValue;
+int8_t RX_joystick_receivedValue;
+int8_t RY_joystick_receivedValue;
 
 // Define a data structure
 typedef struct {
-  int8_t joystickUART;
+  int8_t LJSY;
+  int8_t RJSX;
+  int8_t RJSY;
 } UARTmessage;
  
 // Create a structured object
@@ -38,9 +42,14 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   printMAC(middleMacAddress);                /// For debug only ///
 
   memcpy(&UARTData, incomingData, sizeof(UARTData));
-  joystick_receivedValue = UARTData.joystickUART;
-  Serial.print("Joystick Value: ");
-  Serial.println(joystick_receivedValue);
+  Serial.print("Left Y: ");
+  Serial.println(UARTData.LJSY);
+  Serial.print("Right X: ");
+  Serial.println(UARTData.RJSX);
+  Serial.print("Right Y: ");
+  Serial.println(UARTData.RJSY);
+
+  LY_joystick_receivedValue = UARTData.LJSY;
 }
 
 void init_espnow_receiver()

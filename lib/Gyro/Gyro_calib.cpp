@@ -3,13 +3,10 @@
 #include <ESP32Servo.h>
 #include <Arduino.h>
 
-///////////////////////////////////////////////
-//Declare variables
-///////////////////////////////////////////////
-float RateRoll, RatePitch, RateYaw;
-float AccX, AccY, AccZ;
 float AccX_calib = -0.05, AccY_calib = 0.05, AccZ_calib = 0.08;
 float AngleRoll, AnglePitch;
+float RateRoll, RatePitch, RateYaw;
+float AccX, AccY, AccZ;
 
 void gyro_calib_signal()
 {
@@ -85,7 +82,7 @@ void gyro_calib_signal()
     ///////////////////////////////////////////////
     //Calculate angle and convert to degrees
     ///////////////////////////////////////////////
-    AngleRoll=atan(AccY/sqrt(AccX*AccX+AccZ*AccZ))*1/(3.142/180);
+    AngleRoll=atan(AccY/sqrt(AccX*AccX+AccZ*AccZ))*1/(3.142/180);   
     AnglePitch=-atan(AccX/sqrt(AccY*AccY+AccZ*AccZ))*1/(3.142/180);
 }
 
@@ -117,4 +114,5 @@ void corrected_values()
     RatePitch-= RateCalibrationPitch;
     RateYaw-= RateCalibrationYaw;
 }
+
 
