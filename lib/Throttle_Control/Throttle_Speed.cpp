@@ -27,10 +27,10 @@ ESC4.write(0);
 void ReceiveThrottleInput(){
       //Left JoyStick Control
       delay (20);
-      if (joystick_receivedValue <= 10) {
+      if (LJSY <= 10) {
         Throttle = 0;
-      } else if (joystick_receivedValue > 10) {
-        Throttle = joystick_receivedValue *  difference_Dist;
+      } else if (LJSY > 10) {
+        Throttle = LJSY *  difference_Dist;
       }
 
       //Right JoyStick Control (P)
