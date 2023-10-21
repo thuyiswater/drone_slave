@@ -14,15 +14,18 @@ int8_t LY_joystick_receivedValue;
 int8_t RX_joystick_receivedValue;
 int8_t RY_joystick_receivedValue;
 
-// Define a data structure
+
+// Define a testing message structure
 typedef struct {
+
   int8_t LJSY;
   int8_t RJSX;
   int8_t RJSY;
 } UARTmessage;
+
  
 // Create a structured object
-UARTmessage UARTData;
+wifiMessage wifiData;
 
 // Create a middle peer object
 esp_now_peer_info_t middlePeer;
@@ -41,6 +44,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   Serial.print("Packet received from: ");
   printMAC(middleMacAddress);                /// For debug only ///
 
+
   memcpy(&UARTData, incomingData, sizeof(UARTData));
   Serial.print("Left Y: ");
   Serial.println(UARTData.LJSY);
@@ -50,6 +54,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   Serial.println(UARTData.RJSY);
 
   LY_joystick_receivedValue = UARTData.LJSY;
+
+
 }
 
 void init_espnow_receiver()

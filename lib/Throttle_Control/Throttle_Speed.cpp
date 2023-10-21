@@ -27,11 +27,12 @@ ESC4.write(0);
 
 void ReceiveThrottleInput(){
       //Left JoyStick Control
-      
+
       if (LY_joystick_receivedValue <= 10) {
         Throttle = 0;
       } else if (LY_joystick_receivedValue > 10) {
         Throttle = LY_joystick_receivedValue *  difference_Dist;
+
       }
 
 
