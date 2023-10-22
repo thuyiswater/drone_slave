@@ -8,30 +8,24 @@ uint8_t middleMacAddress[] = {0x48, 0xE7, 0x29, 0x9F, 0xDD, 0xD4};
 static const char* PMK_KEY_STR = "_A_H_L_T_T_T_ED3";
 static const char* LMK_KEY_STR = "_SON_DINH_VU_ED3";
 
-
 // UART Data received from middle ESP32 through ESP_NOW
 int8_t LY_joystick_receivedValue;
 int8_t RX_joystick_receivedValue;
 int8_t RY_joystick_receivedValue;
 
-
-// Define a testing message structure
+// Define a wifi message structure
 typedef struct {
-
   int8_t LJSY;
   int8_t RJSX;
   int8_t RJSY;
-} UARTmessage;
+} wifiMessage;
 
- 
 // Create a structured object
 wifiMessage wifiData;
 
-// Create a middle peer object
-esp_now_peer_info_t middlePeer;
-
 // Function to print sender's MAC address on Serial Monitor
-void printMAC(const uint8_t * mac_addr){
+void printMAC(const uint8_t * mac_addr)
+{
   char macStr[18];
   snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
            mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
@@ -41,21 +35,25 @@ void printMAC(const uint8_t * mac_addr){
 // Callback function executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
 {
+  // Show packet source MAC address
   Serial.print("Packet received from: ");
-  printMAC(middleMacAddress);                /// For debug only ///
+  printMAC(middleMacAddress);
 
+  // Transfer data from middle packet to a slave packet
+  memcpy(&wifiData, incomingData, sizeof(wifiData));
 
-  memcpy(&UARTData, incomingData, sizeof(UARTData));
+  // Print out received values from middle ESP32 corresponding to PS4 controller signals
   Serial.print("Left Y: ");
-  Serial.println(UARTData.LJSY);
+  Serial.println(wifiData.LJSY);
   Serial.print("Right X: ");
-  Serial.println(UARTData.RJSX);
+  Serial.println(wifiData.RJSX);
   Serial.print("Right Y: ");
-  Serial.println(UARTData.RJSY);
+  Serial.println(wifiData.RJSY);
 
-  LY_joystick_receivedValue = UARTData.LJSY;
-
-
+  // Assign received values to new parameters in slave to executing other tasks
+  LY_joystick_receivedValue = wifiData.LJSY;
+  RX_joystick_receivedValue = wifiData.RJSX;
+  RY_joystick_receivedValue = wifiData.RJSY;
 }
 
 void init_espnow_receiver()
@@ -70,20 +68,25 @@ void init_espnow_receiver()
     return;
   }
   
+  // Create a middle peer object
+  esp_now_peer_info_t middlePeer;
+
   // Set the PMK key
   esp_now_set_pmk((uint8_t *)PMK_KEY_STR);
 
   // Register peer
   memcpy(middlePeer.peer_addr, middleMacAddress, 6);
   middlePeer.channel = 0;
+
     ///*** Set the middle device's LMK ***///
     for (uint8_t i = 0; i < 16; i++)
     {
       middlePeer.lmk[i] = LMK_KEY_STR[i];
     }
-  middlePeer.encrypt = true; // Only middle peer is accessible
 
-  // Add middle peer   
+  middlePeer.encrypt = true; // Only middle ESP32 peer is accessible
+
+  // Detect whether a peer is added or not
   if (esp_now_add_peer(&middlePeer) != ESP_OK){
     Serial.println("Failed to add peer");
     return;

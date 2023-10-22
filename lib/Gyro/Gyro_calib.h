@@ -1,7 +1,5 @@
 #pragma once
 
-// Declare global variables
-
 extern float AccX_calib , AccY_calib, AccZ_calib;
 extern float AngleRoll, AnglePitch;
 extern float RateRoll, RatePitch, RateYaw;
