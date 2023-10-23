@@ -23,6 +23,7 @@ float difference_Dist = (float) 180 / (float) 127;
 // PID setup
 float RateCalibrationPitch, RateCalibrationRoll, RateCalibrationYaw;
 int RateCalibrationNumber;
+
 uint32_t LoopTimer;
 
 float DesiredRateRoll, DesiredRatePitch, DesiredRateYaw;
@@ -30,17 +31,30 @@ float ErrorRateRoll, ErrorRatePitch, ErrorRateYaw;
 float InputRoll, InputThrottle, InputPitch, InputYaw;
 float PrevErrorRateRoll, PrevErrorRatePitch, PrevErrorRateYaw;
 float PrevItermRateRoll, PrevItermRatePitch, PrevItermRateYaw;
+
 float PIDReturn[]={0, 0, 0};
-float PRateRoll=0.6 ; float PRatePitch=PRateRoll; float PRateYaw=2;
-float IRateRoll=3.5 ; float IRatePitch=IRateRoll; float IRateYaw=12;
-float DRateRoll=0.03 ; float DRatePitch=DRateRoll; float DRateYaw=0;
+
+
+// float PRateRoll=1.5; float PRatePitch=PRateRoll; float PRateYaw=0;
+
+// float IRateRoll=2.03 ; float IRatePitch=IRateRoll; float IRateYaw=0;
+
+// float DRateRoll=0.01 ; float DRatePitch=DRateRoll; float DRateYaw=0;
+
+
+float PRateRoll=0.64; float PRatePitch=PRateRoll; float PRateYaw=0;
+
+float IRateRoll=1.03 ; float IRatePitch=IRateRoll; float IRateYaw=0;
+
+float DRateRoll=0.01 ; float DRatePitch=DRateRoll; float DRateYaw=0;
+
 float MotorInput1, MotorInput2, MotorInput3, MotorInput4;
 
 void init_ESC(){
 ESC1.attach(EscPin_LeftFront,1000,2000); 
 ESC2.attach(EscPin_RightFront,1000,2000);
 ESC3.attach(EscPin_LeftBack,1000,2000);
-ESC3.attach(EscPin_RightBack,1000,2000);
+ESC4.attach(EscPin_RightBack,1000,2000);
 
 ESC1.write(0);
 ESC2.write(0);
@@ -73,6 +87,14 @@ float ReceiveRollInput(){
         MatchingRollInput = 127;
       } else MatchingRollInput = 127 + RX_joystick_receivedValue;
       return MatchingRollInput;
+}
+float ReceiveYawInput(){
+      //Right JoyStick Control (RX) - Roll
+      int MatchingYawInput = 0;
+          if (LX_joystick_receivedValue <= 10 || LX_joystick_receivedValue >= -2) {
+        MatchingYawInput = 127;
+      } else MatchingYawInput = 127 + LX_joystick_receivedValue;
+      return MatchingYawInput;
 }
 
 void gyro_calib_signal()
@@ -138,7 +160,7 @@ void gyro_calib_signal()
     RateRoll = (float) GyroX/65.5;
     RatePitch = (float) GyroY/65.6;
     RateYaw = (float) GyroZ/65.5;
-        
+
     ///////////////////////////////////////////////
     //Divide acceleration data by LSB sensitivity and add calibrations
     ///////////////////////////////////////////////
@@ -178,12 +200,16 @@ void corrected_values()
 void pid_equation(float Error, float P , float I, float D, float PrevError, float PrevIterm) {
   float Pterm=P*Error;
   float Iterm=PrevIterm+I*(Error+PrevError)*0.004/2;
-  if (Iterm > 400) Iterm=400;
-  else if (Iterm <-400) Iterm=-400;
+
+  if (Iterm > 40000) Iterm = 40000; //micro sec
+  else if (Iterm <-40000) Iterm =- 40000;
+
   float Dterm=D*(Error-PrevError)/0.004;
   float PIDOutput= Pterm+Iterm+Dterm;
-  if (PIDOutput>400) PIDOutput=400;
-  else if (PIDOutput <-400) PIDOutput=-400;
+
+  if (PIDOutput>40000) PIDOutput=40000;
+  else if (PIDOutput <-40000) PIDOutput=-40000;
+
   PIDReturn[0]=PIDOutput;
   PIDReturn[1]=Error;
   PIDReturn[2]=Iterm;
@@ -193,6 +219,7 @@ void reset_pid(void) {
   PrevErrorRateRoll=0; PrevErrorRatePitch=0; PrevErrorRateYaw=0;
   PrevItermRateRoll=0; PrevItermRatePitch=0; PrevItermRateYaw=0;
 }
+
 void reset_timer(){
     LoopTimer=micros();
 }
@@ -202,13 +229,17 @@ void pid_calculate(){
     RatePitch-=RateCalibrationPitch;
     RateYaw-=RateCalibrationYaw;
 
+
+    // DesiredRateRoll=0.15*(ReceiveRollInput() - 127);
     DesiredRateRoll=0.15*(ReceiveRollInput() - 127);
     DesiredRatePitch=0.15*(ReceivePitchInput() - 127);
-
+    DesiredRateYaw=0.15*(ReceiveYawInput() - 127);
     InputThrottle = ReceiveThrottleInput();
+   
 
     ErrorRateRoll=DesiredRateRoll-RateRoll;
     ErrorRatePitch=DesiredRatePitch-RatePitch;
+    ErrorRateYaw=DesiredRateYaw-RateYaw;
  }
 float pid_calc_roll(){//loop
     pid_equation(ErrorRateRoll, PRateRoll, IRateRoll, DRateRoll, PrevErrorRateRoll, PrevItermRateRoll);
@@ -233,13 +264,16 @@ float pid_calc_yaw(){ //loop
 } 
 
 void control_throttle(){
-    if (InputThrottle > 144) {
-        InputThrottle = 144;
-        MotorInput1= 1.024*(InputThrottle-InputRoll-InputPitch-InputYaw);
-        MotorInput2= 1.024*(InputThrottle-InputRoll+InputPitch+InputYaw);
-        MotorInput3= 1.024*(InputThrottle+InputRoll+InputPitch-InputYaw);
-        MotorInput4= 1.024*(InputThrottle+InputRoll-InputPitch+InputYaw);
+   
+    if (InputThrottle > 160) //80% of total power
+     {
+        InputThrottle = 160;
     }
+    MotorInput1= 1.024*(InputThrottle-InputRoll-InputPitch-InputYaw); //8 bits value
+    MotorInput2= 1.024*(InputThrottle-InputRoll+InputPitch+InputYaw);
+    MotorInput3= 1.024*(InputThrottle+InputRoll+InputPitch-InputYaw);
+    MotorInput4= 1.024*(InputThrottle+InputRoll-InputPitch+InputYaw);
+
     if (MotorInput1 > 180){
         MotorInput1 = 180;
         }
@@ -252,6 +286,7 @@ void control_throttle(){
     if (MotorInput4 > 180){
         MotorInput4 = 180;
         }
+        
     int ThrottleIdle=80;
     if (MotorInput1 < ThrottleIdle){
         MotorInput1 =  ThrottleIdle;
@@ -266,21 +301,21 @@ void control_throttle(){
     if (MotorInput4 < ThrottleIdle) {
         MotorInput4 =  ThrottleIdle;
     }
-    int ThrottleCutOff=60;
-    if ( InputThrottle < 60) {
+
+    int ThrottleCutOff=20;
+    if ( InputThrottle < 20) {
         MotorInput1=ThrottleCutOff; 
         MotorInput2=ThrottleCutOff;
         MotorInput3=ThrottleCutOff; 
         MotorInput4=ThrottleCutOff;
         reset_pid();
   }
-    ESC1.write(MotorInput1);
-    ESC2.write(MotorInput2);
+    ESC1.write(MotorInput4);
+    ESC2.write(MotorInput1);
     ESC3.write(MotorInput3);
-    ESC4.write(MotorInput4);
+    ESC4.write(MotorInput2);
 }
 
 void time_reset(){
     while (micros() - LoopTimer < 4000){}
-        LoopTimer=micros();
- }
+        LoopTimer=micros(); }
