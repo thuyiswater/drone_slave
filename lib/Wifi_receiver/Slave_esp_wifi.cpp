@@ -19,7 +19,8 @@ int8_t LY_joystick_receivedValue;
 int8_t RX_joystick_receivedValue;
 int8_t RY_joystick_receivedValue;
 
-// Define a data structure
+
+// Define a testing message structure
 typedef struct {
   int8_t LJSX;
   int8_t LJSY;
