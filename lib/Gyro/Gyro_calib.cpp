@@ -3,7 +3,7 @@
 #include <ESP32Servo.h>
 #include <Arduino.h>
 
-float AccX_calib = -0.05, AccY_calib = 0.05, AccZ_calib = 0.08;
+float AccX_calib = -0.05, AccY_calib = 0.05, AccZ_calib = 0.08; //Random constant
 float AngleRoll, AnglePitch;
 float RateRoll, RatePitch, RateYaw;
 float AccX, AccY, AccZ;
@@ -69,7 +69,7 @@ void gyro_calib_signal()
     //Divide gyro data by LSB sensitivity
     ///////////////////////////////////////////////
     RateRoll = (float) GyroX/65.5;
-    RatePitch = (float) GyroY/65.6;
+    RatePitch = (float) GyroY/65.5; //Angle per second
     RateYaw = (float) GyroZ/65.5;
         
     ///////////////////////////////////////////////
@@ -103,16 +103,16 @@ void calibration_measurement()
         RateCalibrationYaw += RateYaw;
         delay(1);
     }
-    RateCalibrationRoll /= 2000;
+    RateCalibrationRoll /= 2000; //Unchanged 2000
     RateCalibrationPitch /= 2000;
     RateCalibrationYaw /= 2000;
 }
 
-void corrected_values()
-{
-    RateRoll-= RateCalibrationRoll;
-    RatePitch-= RateCalibrationPitch;
-    RateYaw-= RateCalibrationYaw;
-}
+// void corrected_values()
+// {
+//     RateRoll-= RateCalibrationRoll;
+//     RatePitch-= RateCalibrationPitch;
+//     RateYaw-= RateCalibrationYaw;
+// }
 
 

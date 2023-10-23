@@ -1,6 +1,10 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
+/* localtime example */
+#include <stdio.h>
+#include <time.h>
+
 // MAC address of the sender - Middle ESP32
 uint8_t middleMacAddress[] = {0x48, 0xE7, 0x29, 0x9F, 0xDD, 0xD4};
 
@@ -10,22 +14,34 @@ static const char* LMK_KEY_STR = "_SON_DINH_VU_ED3";
 
 
 // UART Data received from middle ESP32 through ESP_NOW
+int8_t LX_joystick_receivedValue;
 int8_t LY_joystick_receivedValue;
 int8_t RX_joystick_receivedValue;
 int8_t RY_joystick_receivedValue;
 
 // Define a data structure
 typedef struct {
+  int8_t LJSX;
   int8_t LJSY;
   int8_t RJSX;
   int8_t RJSY;
-} UARTmessage;
+} wifiMessage;
  
 // Create a structured object
-UARTmessage UARTData;
+wifiMessage wifiData;
 
 // Create a middle peer object
 esp_now_peer_info_t middlePeer;
+
+void time()
+{
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+  printf ( "Current local time and date: %s\n\n\n", asctime (timeinfo) );
+}
 
 // Function to print sender's MAC address on Serial Monitor
 void printMAC(const uint8_t * mac_addr){
@@ -38,18 +54,19 @@ void printMAC(const uint8_t * mac_addr){
 // Callback function executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
 {
-  Serial.print("Packet received from: ");
-  printMAC(middleMacAddress);                /// For debug only ///
+  // Serial.print("Packet received from: ");
+  // printMAC(middleMacAddress);                /// For debug only ///
 
-  memcpy(&UARTData, incomingData, sizeof(UARTData));
-  Serial.print("Left Y: ");
-  Serial.println(UARTData.LJSY);
-  Serial.print("Right X: ");
-  Serial.println(UARTData.RJSX);
-  Serial.print("Right Y: ");
-  Serial.println(UARTData.RJSY);
+  memcpy(&wifiData, incomingData, sizeof(wifiData));
 
-  LY_joystick_receivedValue = UARTData.LJSY;
+  LX_joystick_receivedValue = wifiData.LJSX;
+  LY_joystick_receivedValue = wifiData.LJSY;
+  RX_joystick_receivedValue = wifiData.RJSX;
+  RY_joystick_receivedValue = wifiData.RJSY;
+
+  // Serial.print("\n\nLeft X      Left Y      Right X      Right Y: \n");
+  // Serial.printf(" %d           %d           %d           %d\n\n\n", LX_joystick_receivedValue, LY_joystick_receivedValue, RX_joystick_receivedValue, RY_joystick_receivedValue);
+  // time();
 }
 
 void init_espnow_receiver()
