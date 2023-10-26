@@ -5,17 +5,29 @@ extern float PID_output_pitch;
 extern float InputThrottle;
 extern float MotorInput4, MotorInput1, MotorInput2, MotorInput3;
 extern float InputRoll, InputThrottle, InputPitch, InputYaw;
+extern float PIDOutput;
+extern float DesiredRateRoll;
+extern uint32_t LoopTimer;
+// setup functions//
 
-void init_ESC();
-void gyro_calib_signal();
 void calibration_measurement();
+void init_ESC();
+void pid_equation(float Error, float P , float I, float D, float PrevError, float PrevIterm);
+
+
+void system_setup();
+
+// loop functions//
 void corrected_values();
-float ReceiveThrottleInput();
-float ReceivePitchInput();
-float ReceiveRollInput();
-void pid_calculate();
-float pid_calc_roll();
-float pid_calc_pitch();
-float pid_calc_yaw();
+void kalman_1d_roll();
+void kalman_1d_pitch();
+void value_update();
+void pid_equation_angleroll();
+void pid_equation_anglepitch();
+void pid_equation_rateroll();
+void pid_equation_ratepitch();
+void pid_equation_rateyaw();
 void control_throttle();
-void time_reset();
+void reset_timer();
+
+

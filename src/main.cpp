@@ -4,57 +4,46 @@
 #include <ESP32Servo.h>
 #include <Wire.h>
 #include <SPI.h>
+#include <PID_controller.h>
+#include <Slave_esp_wifi.h>
 
-// #include "../lib/Gyro/Gyro_calib.h"
-#include "../lib/PID/PID_controller.h"
-// #include "../lib/Printing/Result_printing.h"
-#include "../lib/Setup/System_setup.h"
-#include "../lib/Wifi_receiver/Slave_esp_wifi.h"
+Adafruit_MPU6050 mpu;
+
 void setup()
 {
   Serial.begin(115200);
   // Set up EPS-NOW for slave ESP3
-  init_ESC();
+  init_ESPNOW_Slave();
   system_setup();
   calibration_measurement();
-  init_espnow_receiver();
-
+  init_ESC();
+  LoopTimer=micros();
 }
 
 void loop()
 {
-  gyro_calib_signal();
-  pid_calculate();
-  pid_calc_roll();
-  pid_calc_pitch();
-  pid_calc_yaw();
-  control_throttle();
-  
-  
-  // Serial.printf("%0.1f\n", InputThrottle);
-
-  Serial.printf("Motor 1: ");
-  Serial.printf("%0.1f\t", MotorInput1);
-
-  Serial.printf("Motor 2: ");
-  Serial.printf("%0.1f\t", MotorInput2);
-
-  Serial.printf("Motor 3: ");
-  Serial.printf("%0.1f\t", MotorInput3);
-
-  Serial.printf("Motor 4: ");
-  Serial.printf("%0.1f\n", MotorInput4);
-
-  //   Serial.printf("Roll: ");
-  // Serial.printf("%0.1f\t", InputRoll);
-
-  // Serial.printf("Pitch: ");
-  // Serial.printf("%0.1f\t", InputPitch);
-
-  // Serial.printf("Yaw: ");
-  // Serial.printf("%0.1f\t\n", InputYaw);
+corrected_values();
+kalman_1d_roll();
+kalman_1d_pitch();
+value_update();
+pid_equation_angleroll();
+pid_equation_anglepitch();
+pid_equation_rateroll();
+pid_equation_ratepitch();
+pid_equation_rateyaw();
+control_throttle();
+reset_timer();
 
 
-  time_reset();
-  
+Serial.print("Motor 1: ");
+Serial.print(MotorInput1);
+
+Serial.print("\tMotor 2: ");
+Serial.print(MotorInput2);
+
+Serial.print("\tMotor 3: ");
+Serial.print(MotorInput3);
+
+Serial.print("\tMotor 4: ");
+Serial.print(MotorInput4);
 }
