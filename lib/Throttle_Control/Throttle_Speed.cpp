@@ -32,9 +32,7 @@ void ReceiveThrottleInput(){
         Throttle = 0;
       } else if (LY_joystick_receivedValue > 10) {
         Throttle = LY_joystick_receivedValue *  difference_Dist;
-
       }
-
 
       //Right JoyStick Control (RY) - Pitch
 
@@ -46,7 +44,6 @@ void ReceiveThrottleInput(){
         Pitch = RY_joystick_receivedValue * difference_Dist;
       }
 
-
       //Right JoyStick Control (RX) - Roll
 
       if (RX_joystick_receivedValue <= 10 || RX_joystick_receivedValue >= -2) {
@@ -57,7 +54,6 @@ void ReceiveThrottleInput(){
         Roll = RX_joystick_receivedValue * difference_Dist;
       }
       delay (20)
-
 
       ESC1.write(Throttle);
       ESC2.write(Throttle);
