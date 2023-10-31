@@ -13,18 +13,20 @@ static const char* PMK_KEY_STR = "_A_H_L_T_T_T_ED3";
 static const char* LMK_KEY_STR = "_SON_DINH_VU_ED3";
 
 // UART Data received from middle ESP32 through ESP_NOW
-int8_t LX_joystick_receivedValue;
 int8_t LY_joystick_receivedValue;
 int8_t RX_joystick_receivedValue;
 int8_t RY_joystick_receivedValue;
+int8_t L1_button_receivedValue;
+int8_t R1_button_receivedValue;
 
 // Define a wifi joystick message structure
 typedef struct {
-  int8_t LJSX;
   int8_t LJSY;
   int8_t RJSX;
   int8_t RJSY;
-} joystickMessage;
+  int8_t L1;
+  int8_t R1;
+} PS4_receivedMessage;
 
 // Define a wifi GPS message structure
 // typedef struct {
@@ -33,7 +35,7 @@ typedef struct {
 // } gpsMessage;
  
 // Create a structured object for joystick incoming data
-joystickMessage joystickData;
+PS4_receivedMessage PS4Data;
 
 // Create a structured object for GPS sent data
 // gpsMessage gpsData;
@@ -55,12 +57,13 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   // Serial.print("Packet received from: ");
   // printMAC(middleMacAddress);                /// For debug only ///
 
-  memcpy(&joystickData, incomingData, sizeof(joystickData));
+  memcpy(&PS4Data, incomingData, sizeof(PS4Data));
 
-  LX_joystick_receivedValue = joystickData.LJSX;
-  LY_joystick_receivedValue = joystickData.LJSY;
-  RX_joystick_receivedValue = joystickData.RJSX;
-  RY_joystick_receivedValue = joystickData.RJSY;
+  LY_joystick_receivedValue = PS4Data.LJSY;
+  RX_joystick_receivedValue = PS4Data.RJSX;
+  RY_joystick_receivedValue = PS4Data.RJSY;
+  L1_button_receivedValue = PS4Data.L1;
+  R1_button_receivedValue = PS4Data.R1;
 
 //   Serial.print("\n\nLeft X      Left Y      Right X      Right Y: \n");
 //   Serial.printf(" %d           %d           %d           %d\n\n\n", LX_joystick_receivedValue, LY_joystick_receivedValue, RX_joystick_receivedValue, RY_joystick_receivedValue);
