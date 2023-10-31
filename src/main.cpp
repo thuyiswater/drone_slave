@@ -6,12 +6,15 @@
 #include <SPI.h>
 #include <PID_controller.h>
 #include <Slave_esp_wifi.h>
-
 Adafruit_MPU6050 mpu;
+  
+
 
 void setup()
 {
   Serial.begin(115200);
+  while (!Serial)
+    ;
   // Set up EPS-NOW for slave ESP3
   init_ESPNOW_Slave();
   system_setup();
@@ -32,18 +35,29 @@ pid_equation_rateroll();
 pid_equation_ratepitch();
 pid_equation_rateyaw();
 control_throttle();
-reset_timer();
+SerialDataWrite();
 
 
-Serial.print("Motor 1: ");
-Serial.print(MotorInput1);
+// Serial.print("Motor 1: ");
+// Serial.print(MotorInput1);
 
-Serial.print("\tMotor 2: ");
-Serial.print(MotorInput2);
+// Serial.print("\tMotor 2: ");
+// Serial.print(MotorInput2);
 
-Serial.print("\tMotor 3: ");
-Serial.print(MotorInput3);
+// Serial.print("\tMotor 3: ");
+// Serial.print(MotorInput3);
 
-Serial.print("\tMotor 4: ");
-Serial.print(MotorInput4);
+// Serial.print("\tMotor 4: ");
+// Serial.println(MotorInput4);
+
+
+// Serial.print("\tMotor 3: ");
+// Serial.print(MotorInput3);
+
+// Serial.print("\tMotor 4: ");
+// Serial.print(MotorInput4);
+
+// Serial.print ("\n\nInput Yaw: ");
+// Serial.print (DesiredRateYaw);
+
 }
