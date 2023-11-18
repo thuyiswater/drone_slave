@@ -33,42 +33,20 @@
     float PrevErrorAngleRoll, PrevErrorAnglePitch;
     float PrevItermAngleRoll, PrevItermAnglePitch;
 
-    // //PID gains for velocicty (rate or velocity of the motor)
-    // float PRateRoll = 3; float PRatePitch=PRateRoll; float PRateYaw = 3.0;
-    // float IRateRoll = 2.5; float IRatePitch=IRateRoll; float IRateYaw = 3.0;
-    // float DRateRoll = 0.4; float DRatePitch=DRateRoll; float DRateYaw = 0.03;
 
-    // //PID gains for position (angle)
-    // float PAngleRoll = 3.7; float PAnglePitch = PAngleRoll;
-    // float IAngleRoll = 0.3; float IAnglePitch = IAngleRoll;
-    // float DAngleRoll = 0.4; float DAnglePitch = DAngleRoll;
-
-
-    // //PID gains for velocicty (rate or velocity of the motor)
-    // float PRateRoll = 6.0; float PRatePitch=PRateRoll; float PRateYaw = 2.0;
-    // float IRateRoll = 3.5; float IRatePitch=IRateRoll; float IRateYaw = 6.0;
-    // float DRateRoll = 0.4; float DRatePitch=DRateRoll; float DRateYaw = 0.01;
-
-    // //PID gains for position (angle)
-    // float PAngleRoll = 8.0; float PAnglePitch = PAngleRoll;
-    // float IAngleRoll = 0.0; float IAnglePitch = IAngleRoll;
-    // float DAngleRoll = 0.0; float DAnglePitch = DAngleRoll;
-
-     //PID gains for velocicty (rate or velocity of the motor)
-    float PRateRoll = 2.9; float PRatePitch=PRateRoll; float PRateYaw = 0.1;
-    float IRateRoll = 0.2; float IRatePitch=IRateRoll; float IRateYaw = 9.0; //tang yaw error
-    float DRateRoll = 0.02; float DRatePitch=DRateRoll; float DRateYaw = 0.0;
-
+    float PRateRoll = 0.4285; float PRatePitch=PRateRoll; float PRateYaw = 0.0; 
+    float IRateRoll = 0.065; float IRatePitch=IRateRoll; float IRateYaw = 2.0;
+    float DRateRoll = 0.0375; float DRatePitch=DRateRoll; float DRateYaw = 0.0;
 
 
     //PID gains for position (angle)
-    float PAngleRoll = 0.0; float PAnglePitch = PAngleRoll;
-    float IAngleRoll = 0.0; float IAnglePitch = IAngleRoll;
-    float DAngleRoll = 0.0; float DAnglePitch = DAngleRoll;
+    float PAngleRoll = 0.325; float PAnglePitch = PAngleRoll;
+    float IAngleRoll = 0.01; float IAnglePitch = IAngleRoll;
+    float DAngleRoll = 0.0; float DAnglePitch = DAngleRoll; 
 
 
 //Motor setup
-    #define EscPin_LeftFront 4
+    #define EscPin_LeftFront 18
     #define EscPin_LeftBack 23
     #define EscPin_RightFront 5
     #define EscPin_RightBack 19
@@ -86,14 +64,13 @@ void system_setup(){
 
 void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, float KalmanMeasurement)
 {
-    KalmanState=KalmanState+0.004*KalmanInput;
-    KalmanUncertainty=KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
-    float KalmanGain=KalmanUncertainty * 1/(1*KalmanUncertainty + 3 * 3);
-    KalmanState=KalmanState+KalmanGain * (
-    KalmanMeasurement-KalmanState);
-    KalmanUncertainty=(1-KalmanGain) * KalmanUncertainty;
-    Kalman1DOutput[0]=KalmanState; 
-    Kalman1DOutput[1]=KalmanUncertainty;
+    KalmanState = KalmanState + 0.004 * KalmanInput;
+    KalmanUncertainty = KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
+    float KalmanGain = KalmanUncertainty * 1/(1 * KalmanUncertainty + 3 * 3);
+    KalmanState = KalmanState + KalmanGain * (KalmanMeasurement - KalmanState);
+    KalmanUncertainty = (1-KalmanGain) * KalmanUncertainty;
+    Kalman1DOutput[0] = KalmanState; 
+    Kalman1DOutput[1] = KalmanUncertainty;
 }
 
 void gyro_signals(void) //angular speed, rad/s or degree/s
@@ -155,22 +132,59 @@ void calibration_measurement()
     
 }
 
+
 void init_ESC(){
+
 ESC1.attach(EscPin_LeftFront,1000,2000); // motor 4
 ESC2.attach(EscPin_RightFront,1000,2000); //motor 1
 ESC3.attach(EscPin_LeftBack,1000,2000); //motor 3
 ESC4.attach(EscPin_RightBack,1000,2000); //motor 2
 
-/////////////////////// Calibrate for ESC by turning on max and min throttle///////
-ESC1.write(180);
-ESC2.write(180);
-ESC3.write(180);
-ESC4.write(180);
+    ESC1.writeMicroseconds(1000); // Sending MIN_SIGNAL tells the ESC the calibration value
+    ESC2.writeMicroseconds(1000);
+    ESC3.writeMicroseconds(1000);
+    ESC4.writeMicroseconds(1000);
 
-ESC1.write(0);
-ESC2.write(0);
-ESC3.write(0);
-ESC4.write(0);
+
+}
+/////////////////////// Calibrate for ESC by turning on max and min throttle///////
+void WaitForKeyStroke()
+{
+  while (!Serial.available())
+    ;
+  while (Serial.available())
+    Serial.read();
+}
+void calibrate(){
+
+    delay(2000);
+    ESC1.attach(EscPin_LeftFront,1000,2000); // motor 4
+    ESC2.attach(EscPin_RightFront,1000,2000); //motor 1
+    ESC3.attach(EscPin_LeftBack,1000,2000); //motor 3
+    ESC4.attach(EscPin_RightBack,1000,2000); //motor 2
+
+    Serial.println();
+    Serial.println("Calibration step 1. Disconnect the battery.");
+    Serial.println("Press any key to continue.");
+    WaitForKeyStroke();
+    ESC1.writeMicroseconds(2000); // Sending MAX_SIGNAL tells the ESC to enter calibration mode
+    ESC2.writeMicroseconds(2000);
+    ESC3.writeMicroseconds(2000);
+    ESC4.writeMicroseconds(2000);
+    Serial.println();
+    Serial.println("Calibration step 2. Connect the battery.");
+    Serial.println("Wait for two short bips.");
+    Serial.println("Press any key to continue.");
+    WaitForKeyStroke();
+
+    ESC1.writeMicroseconds(1000); // Sending MIN_SIGNAL tells the ESC the calibration value
+    ESC2.writeMicroseconds(1000);
+    ESC3.writeMicroseconds(1000);
+    ESC4.writeMicroseconds(1000);
+    Serial.println();
+    Serial.println("Wait for 4 short bips, and one long bip.");
+    Serial.println("Press any key to finish.");
+    WaitForKeyStroke();
 ///////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -180,10 +194,19 @@ float ReceiveThrottleInput(){
     if (LY_joystick_receivedValue <= 10 ) {
         MatchingThrottleInput = 0;
     } else{
-        MatchingThrottleInput = LY_joystick_receivedValue * difference_Dist;
+        MatchingThrottleInput =  map(LY_joystick_receivedValue,0,127,0,180);
     }
     return MatchingThrottleInput;
 }
+
+void checkInputController(){
+    
+    ESC1.write(ReceiveThrottleInput());       
+    ESC2.write(ReceiveThrottleInput());   
+    ESC3.write(ReceiveThrottleInput());   
+    ESC4.write(ReceiveThrottleInput());                              // Send the command to the ESC
+}
+
 float ReceivePitchInput(){
     //Right JoyStick Control (RY) - Pitch
     int MatchingPitchInput = 0;
@@ -202,7 +225,6 @@ float ReceiveRollInput(){
 }
 float ReceiveYawInput(){
     int MatchingYawInput = 0;
-    //Right JoyStick Control (RX) - Roll
     MatchingYawInput = 127;
     
     if (L1_button_receivedValue == 3) {
@@ -238,6 +260,7 @@ void pid_equation(float Error, float P , float I, float D, float PrevError, floa
     //Set the limit for the PID output
     if (PIDOutput>400) PIDOutput=400; // in mili seconds
     else if (PIDOutput <-400) PIDOutput=-400;
+    // constrain(PIDOutput, -400, 400); 
 
     PIDReturn[0]=PIDOutput;
     PIDReturn[1]=Error;
@@ -277,7 +300,7 @@ void kalman_1d_pitch(){
 
 }
 
-void value_update(){
+void value_update(){ 
     
     DesiredAngleRoll=0.10*(ReceiveRollInput()-127);
     DesiredAnglePitch=0.10*(ReceivePitchInput()-127);
@@ -299,6 +322,7 @@ void pid_equation_anglepitch(){
     DesiredRatePitch=PIDReturn[0]; 
     PrevErrorAnglePitch=PIDReturn[1];
     PrevItermAnglePitch=PIDReturn[2];
+
     ErrorRateRoll=DesiredRateRoll-RateRoll;
     ErrorRatePitch=DesiredRatePitch-RatePitch;
     ErrorRateYaw=DesiredRateYaw-RateYaw; 
@@ -329,11 +353,11 @@ void pid_equation_rateyaw(){
 
 void control_throttle(){
    
-    if (InputThrottle > 144) //80% of total power
+    if (InputThrottle > 144) //80%  of total power
     {
         InputThrottle = 144;
     }
-    MotorInput1 =   (InputThrottle - InputRoll - InputPitch - InputYaw); //8 bits value
+    MotorInput1 =   (InputThrottle - InputRoll - InputPitch - InputYaw); 
     MotorInput2 =   (InputThrottle - InputRoll + InputPitch + InputYaw);
     MotorInput3 =   (InputThrottle + InputRoll + InputPitch - InputYaw);
     MotorInput4 =   (InputThrottle + InputRoll - InputPitch + InputYaw);
@@ -351,7 +375,7 @@ void control_throttle(){
         MotorInput4 = 179;
         }
         
-    int ThrottleIdle = 40;
+    int ThrottleIdle = 30;
     if (MotorInput1 < ThrottleIdle){
         MotorInput1 = ThrottleIdle;
     }
@@ -366,7 +390,7 @@ void control_throttle(){
         MotorInput4 = ThrottleIdle;
     }
 
-    int ThrottleCutOff = 20;
+    int ThrottleCutOff = 0;
     if ( InputThrottle < 20) {
         MotorInput1 = ThrottleCutOff; 
         MotorInput2 = ThrottleCutOff;
@@ -379,14 +403,9 @@ void control_throttle(){
     ESC3.write(MotorInput3);
     ESC4.write(MotorInput2);
 }
-void reset_timer(){
-    while (micros() - LoopTimer < 4000);//waiting to update LoopTimer
-    LoopTimer = micros();
-}
 
 void SerialDataWrite() {
-    reset_timer();
-    Serial.println(String(LoopTimer/1000) +  ", Pitch: " + String(AnglePitch) + ", Roll: " + String(AngleRoll));
+    Serial.println(String(LoopTimer/1000) +  ", Pitch: " + String(KalmanAnglePitch) + ", Roll: " + String(KalmanAngleRoll));
   
 }
 

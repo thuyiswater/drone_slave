@@ -7,7 +7,6 @@ extern float MotorInput4, MotorInput1, MotorInput2, MotorInput3;
 extern float InputRoll, InputThrottle, InputPitch, InputYaw;
 extern float PIDOutput;
 extern float DesiredRateRoll, DesiredRateYaw;
-extern int MatchingYawInput;
 extern float RateRoll, RatePitch;
 extern float RateCalibrationRoll, RateCalibrationPitch;
 
@@ -28,7 +27,7 @@ void corrected_values();
 void kalman_1d_roll();
 void kalman_1d_pitch();
 void value_update();
-float ReceiveYawInput();
+float ReceiveThrottleInput();
 
 void pid_equation_angleroll();
 void pid_equation_anglepitch();
@@ -38,4 +37,5 @@ void pid_equation_rateyaw();
 void control_throttle();
 void reset_timer();
 void SerialDataWrite();
-
+void calibrate();
+void checkInputController();

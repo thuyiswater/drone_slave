@@ -65,8 +65,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
   L1_button_receivedValue = PS4Data.L1;
   R1_button_receivedValue = PS4Data.R1;
 
-//   Serial.print("\n\nLeft X      Left Y      Right X      Right Y: \n");
-//   Serial.printf(" %d           %d           %d           %d\n\n\n", LX_joystick_receivedValue, LY_joystick_receivedValue, RX_joystick_receivedValue, RY_joystick_receivedValue);
+  // Serial.print("\n\nLeft Y      Right X      Right Y: \n");
+  // Serial.printf("%d           %d           %d\n\n\n", LY_joystick_receivedValue, RX_joystick_receivedValue, RY_joystick_receivedValue);
 }
 
 // Callback function executed when data is sent
@@ -81,6 +81,8 @@ void init_ESPNOW_Slave()
   // Set Slave ESP32 as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
  
+  esp_wifi_set_ps(WIFI_PS_NONE);
+
   // Change MAC
   esp_wifi_set_mac(WIFI_IF_STA, New_MAC_Address);
 
@@ -119,6 +121,22 @@ void init_ESPNOW_Slave()
   // esp_now_register_send_cb(OnDataSent);
 }
 
+void Print_PS4_Value (){
+  Serial.print("\n [");
+  Serial.printf("%4d", LY_joystick_receivedValue); // LY
+  Serial.print ("  ");
+  Serial.printf("%4d", RX_joystick_receivedValue); // RX
+  Serial.print ("  ");
+  Serial.printf("%4d", RY_joystick_receivedValue); // RY
+  Serial.print("] ");
+
+  Serial.print(" [");
+  Serial.print(L1_button_receivedValue); // L1
+  Serial.print ("  ");
+  Serial.print(R1_button_receivedValue); // R1
+  Serial.print ("]");
+}
+
 // void sendingGPS_throughESPNOW()
 // {
 //   // Assign structured GPS data
@@ -126,5 +144,5 @@ void init_ESPNOW_Slave()
 //   gpsData.Lat = Latitude;
 
 //   // Send message via ESP-NOW
-//   esp_err_t result = esp_now_send(middleAddress, (int8_t *) &gpsData, sizeof(gpsData));
+//   esp_now_send(middleAddress, (int8_t *) &gpsData, sizeof(gpsData));
 // }
