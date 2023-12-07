@@ -2,7 +2,6 @@
     #include <Arduino.h>
     #include <Adafruit_MPU6050.h>  
     #include <ESP32Servo.h>
-    #include <BasicLinearAlgebra.h>
     #include "../Wifi_receiver/Slave_esp_wifi.h"
 
     
@@ -34,22 +33,22 @@
     float PrevItermAngleRoll, PrevItermAnglePitch;
 
 
-    float PRateRoll = 0.4285; float PRatePitch=PRateRoll; float PRateYaw = 0.0; 
-    float IRateRoll = 0.065; float IRatePitch=IRateRoll; float IRateYaw = 2.0;
-    float DRateRoll = 0.0375; float DRatePitch=DRateRoll; float DRateYaw = 0.0;
+    float PRateRoll = 4.0; float PRatePitch=PRateRoll; float PRateYaw = 0.0; 
+    float IRateRoll = 0.0; float IRatePitch=IRateRoll; float IRateYaw = 0.0;
+    float DRateRoll = 0.0; float DRatePitch=DRateRoll; float DRateYaw = 0.0;
 
 
     //PID gains for position (angle)
-    float PAngleRoll = 0.325; float PAnglePitch = PAngleRoll;
-    float IAngleRoll = 0.01; float IAnglePitch = IAngleRoll;
+    float PAngleRoll = 4.0; float PAnglePitch = PAngleRoll;
+    float IAngleRoll = 0.0; float IAnglePitch = IAngleRoll;
     float DAngleRoll = 0.0; float DAnglePitch = DAngleRoll; 
 
 
 //Motor setup
-    #define EscPin_LeftFront 18
-    #define EscPin_LeftBack 23
+    #define EscPin_LeftFront 19
+    #define EscPin_LeftBack 18
     #define EscPin_RightFront 5
-    #define EscPin_RightBack 19
+    #define EscPin_RightBack 23
     Servo ESC1, ESC2, ESC3, ESC4;
 
 void system_setup(){
@@ -191,11 +190,7 @@ void calibrate(){
 float ReceiveThrottleInput(){
     //Left JoyStick Control - Throttle
     int MatchingThrottleInput = 0;
-    if (LY_joystick_receivedValue <= 10 ) {
-        MatchingThrottleInput = 0;
-    } else{
-        MatchingThrottleInput =  map(LY_joystick_receivedValue,0,127,0,180);
-    }
+    MatchingThrottleInput = PWM;
     return MatchingThrottleInput;
 }
 
@@ -210,35 +205,24 @@ void checkInputController(){
 float ReceivePitchInput(){
     //Right JoyStick Control (RY) - Pitch
     int MatchingPitchInput = 0;
-    if (RY_joystick_receivedValue <= 10 && RY_joystick_receivedValue >= -2) { 
-        MatchingPitchInput = 127;
-    } else MatchingPitchInput = 127 + RY_joystick_receivedValue;
+    MatchingPitchInput = Y_value;
     return MatchingPitchInput;
 }
 float ReceiveRollInput(){
     //Right JoyStick Control (RX) - Roll
     int MatchingRollInput = 0;
-    if (RX_joystick_receivedValue <= 10 && RX_joystick_receivedValue >= -2) {
-        MatchingRollInput = 127;
-    } else MatchingRollInput = 127 + RX_joystick_receivedValue;
+    MatchingRollInput = X_value;
     return MatchingRollInput;
 }
 float ReceiveYawInput(){
     int MatchingYawInput = 0;
-    MatchingYawInput = 127;
     
-    if (L1_button_receivedValue == 3) {
-        MatchingYawInput =100;           
-        // if (MatchingYawInput <= 100)  {
-        //     MatchingYawInput = 100;
-        // }
+    if (leftB) {
+        MatchingYawInput = -30;
     }
     
-    if (R1_button_receivedValue == 2) {
-        MatchingYawInput =154;
-        // if (MatchingYawInput >= 154) {
-        //     MatchingYawInput = 154;
-        // }
+    if (rightB) {
+        MatchingYawInput = 30;
     }
     
     return MatchingYawInput;
@@ -306,8 +290,8 @@ void value_update(){
     DesiredAnglePitch=0.10*(ReceivePitchInput()-127);
     DesiredRateYaw=0.15*(ReceiveYawInput()-127);
     InputThrottle=ReceiveThrottleInput();
-    ErrorAngleRoll=DesiredAngleRoll-KalmanAngleRoll;
-    ErrorAnglePitch=DesiredAnglePitch-KalmanAnglePitch;
+    ErrorAngleRoll=DesiredAngleRoll-KalmanAngleRoll; // co gia tri
+    ErrorAnglePitch=DesiredAnglePitch-KalmanAnglePitch;// co gia tri
  }
 
 void pid_equation_angleroll(){
@@ -322,6 +306,7 @@ void pid_equation_anglepitch(){
     DesiredRatePitch=PIDReturn[0]; 
     PrevErrorAnglePitch=PIDReturn[1];
     PrevItermAnglePitch=PIDReturn[2];
+
 
     ErrorRateRoll=DesiredRateRoll-RateRoll;
     ErrorRatePitch=DesiredRatePitch-RatePitch;
@@ -398,15 +383,13 @@ void control_throttle(){
         MotorInput4 = ThrottleCutOff;
         reset_pid();
   }
-    ESC1.write(MotorInput4);
-    ESC2.write(MotorInput1);
+    ESC1.write(MotorInput1);
+    ESC2.write(MotorInput2);
     ESC3.write(MotorInput3);
-    ESC4.write(MotorInput2);
+    ESC4.write(MotorInput4);
 }
 
 void SerialDataWrite() {
-    Serial.println(String(LoopTimer/1000) +  ", Pitch: " + String(KalmanAnglePitch) + ", Roll: " + String(KalmanAngleRoll));
-  
-}
+    Serial.printf("\n%3.0f, %3.0f, %3.0f, %3.0f", MotorInput1,MotorInput2,MotorInput3,MotorInput4);
 
-
+    }

@@ -28,15 +28,17 @@ corrected_values();
 kalman_1d_roll();
 kalman_1d_pitch();
 value_update();
-pid_equation_angleroll();
-pid_equation_anglepitch();
 pid_equation_rateroll();
 pid_equation_ratepitch();
+pid_equation_angleroll();
+pid_equation_anglepitch();
+
 pid_equation_rateyaw();
 control_throttle();
 // checkInputController();//Turn this on when calibrate
 
-// // Print_PS4_Value ();
+// Print_PS4_Value ();
 SerialDataWrite();
+
 
 }

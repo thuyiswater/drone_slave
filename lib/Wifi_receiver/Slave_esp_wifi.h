@@ -1,10 +1,10 @@
 #pragma once
 
-extern int8_t LY_joystick_receivedValue;
-extern int8_t RX_joystick_receivedValue;
-extern int8_t RY_joystick_receivedValue;
-extern int8_t L1_button_receivedValue;
-extern int8_t R1_button_receivedValue;
+extern int PWM;
+extern byte X_value;
+extern byte Y_value;
+extern byte leftB;
+extern byte rightB;
 
 void init_ESPNOW_Slave();
 void Print_PS4_Value ();
